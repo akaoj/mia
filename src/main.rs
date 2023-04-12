@@ -3,7 +3,10 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 
 use axum::{
-    routing::{get},
+    routing::{
+        get,
+        post,
+    },
     http::StatusCode,
     response::{IntoResponse, Response},
     Json,
@@ -20,11 +23,8 @@ mod utils;
 mod views;
 use crate::errors::MiaError;
 use crate::utils::DB;
-use crate::views::service_accounts::{
-    get_service_account,
-    list_service_accounts,
-};
-
+use crate::views::requests;
+use crate::views::service_accounts;
 
 #[derive(Clone)]
 pub struct AppState {
@@ -41,8 +41,10 @@ async fn main() {
     };
 
     let app = Router::new()
-        .route("/service-accounts/", get(list_service_accounts))
-        .route("/service-accounts/:name", get(get_service_account))
+        .route("/requests/", get(requests::list))
+        .route("/service-accounts/", get(service_accounts::list))
+        .route("/service-accounts/", post(service_accounts::create))
+        .route("/service-accounts/:name", get(service_accounts::get))
         .with_state(app_state);
 
     let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
